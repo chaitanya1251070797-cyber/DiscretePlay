@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLearningEngine } from '../../engine/LearningEngineContext';
-import { RotateCcw, ArrowRight, CheckCircle2, ShieldAlert, Sparkles, Layers } from 'lucide-react';
+import { RotateCcw, ArrowRight, CheckCircle2, Undo2, Award, Zap } from 'lucide-react';
+import { sound } from '../../utils/sound';
+import confetti from 'canvas-confetti';
 
 type Peg = number[]; // disk sizes from bottom to top
 
@@ -15,7 +17,7 @@ export const HanoiGame: React.FC = () => {
     setInteractionMode
   } = useLearningEngine();
 
-  // Number of disks depends on stage: 3 for Discover/Experiment/Reasoning, 4 for Independent Application!
+  // 3 for earlier stages, 4 for Independent Application challenge
   const diskCount = currentStage === 'INDEPENDENT_APPLICATION' ? 4 : 3;
   const optimalMoves = Math.pow(2, diskCount) - 1;
 
@@ -26,20 +28,25 @@ export const HanoiGame: React.FC = () => {
     []
   ]);
 
+  const [history, setHistory] = useState<Peg[][]>([]);
   const [selectedPeg, setSelectedPeg] = useState<number | null>(null);
   const [moveCount, setMoveCount] = useState<number>(0);
   const [isSolved, setIsSolved] = useState<boolean>(false);
+  const [errorPeg, setErrorPeg] = useState<number | null>(null);
 
   // Reset pegs when diskCount changes
   const resetGame = useCallback(() => {
+    sound.playClick(440);
     setPegs([
       Array.from({ length: diskCount }, (_, i) => diskCount - i),
       [],
       []
     ]);
+    setHistory([]);
     setSelectedPeg(null);
     setMoveCount(0);
     setIsSolved(false);
+    setErrorPeg(null);
   }, [diskCount]);
 
   useEffect(() => {
@@ -51,12 +58,23 @@ export const HanoiGame: React.FC = () => {
     updateSharedGameState({ diskCount, moveCount, optimalMoves });
   }, [diskCount, moveCount, optimalMoves, updateSharedGameState]);
 
+  const undoMove = () => {
+    if (history.length === 0 || isSolved) return;
+    sound.playClick(380);
+    const prev = history[history.length - 1];
+    setPegs(prev);
+    setHistory(history.slice(0, -1));
+    setMoveCount(c => Math.max(0, c - 1));
+    setSelectedPeg(null);
+  };
+
   const handlePegClick = (pegIdx: number) => {
     if (isSolved) return;
 
     if (selectedPeg === null) {
       // Pick source peg
       if (pegs[pegIdx].length === 0) return;
+      sound.playMove();
       setSelectedPeg(pegIdx);
     } else {
       // Attempt move from selectedPeg to pegIdx
@@ -64,7 +82,10 @@ export const HanoiGame: React.FC = () => {
       const toPeg = pegIdx;
       setSelectedPeg(null);
 
-      if (fromPeg === toPeg) return;
+      if (fromPeg === toPeg) {
+        sound.playClick(350);
+        return;
+      }
 
       const sourceStack = [...pegs[fromPeg]];
       const targetStack = [...pegs[toPeg]];
@@ -73,7 +94,10 @@ export const HanoiGame: React.FC = () => {
 
       // VALIDATION: Check invariant (larger disk cannot be placed on smaller disk)
       if (movingDisk > targetTopDisk) {
-        // VIOLATION!
+        sound.playError();
+        setErrorPeg(toPeg);
+        setTimeout(() => setErrorPeg(null), 600);
+
         recordAction(
           false, 
           'larger_on_smaller', 
@@ -91,6 +115,9 @@ export const HanoiGame: React.FC = () => {
       }
 
       // Valid move!
+      sound.playPlace();
+      setHistory(h => [...h, pegs]);
+
       sourceStack.pop();
       targetStack.push(movingDisk);
 
@@ -98,84 +125,110 @@ export const HanoiGame: React.FC = () => {
       nextPegs[fromPeg] = sourceStack;
       nextPegs[toPeg] = targetStack;
       setPegs(nextPegs);
-      setMoveCount(prev => prev + 1);
+
+      const nextMoves = moveCount + 1;
+      setMoveCount(nextMoves);
       recordAction(true);
 
-      // Check subproblem milestone: e.g. disks 1 & 2 transferred to Peg B
-      const pegB = nextPegs[1];
-      const pegC = nextPegs[2];
-      if (diskCount === 3 && pegB.length === 2 && pegB[0] === 2 && pegB[1] === 1 && nextPegs[0].length === 1) {
-        addExplanation(
-          'Recursive Subproblem Milestone T(2) Reached!',
-          'Notice: the top 2 disks are now safely stacked on Peg B. Disk 3 is free to transfer directly to Peg C!',
-          'Subproblem T(n-1) solved in 2^{n-1} - 1 = 2^2 - 1 = 3 moves.',
-          'strategic_subgoal'
-        );
-      }
-
-      // Check Win Condition: All disks on Peg C (Peg 2)
+      // Check win condition: all disks successfully on Peg 2 (C)
       if (nextPegs[2].length === diskCount) {
         setIsSolved(true);
-        const nextMoves = moveCount + 1;
-        const isOptimal = nextMoves === optimalMoves;
+        sound.playSuccess();
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+
+        markConceptMastered('recursion-base');
+        if (nextMoves <= optimalMoves) {
+          markConceptMastered('recurrence-relations');
+        }
+        if (currentStage === 'INDEPENDENT_APPLICATION') {
+          markConceptMastered('closed-form-recurrences');
+        }
 
         addExplanation(
           'Tower of Hanoi Solved!',
-          `You transferred all ${diskCount} disks in ${nextMoves} moves (Optimal: ${optimalMoves}).`,
-          `Closed form recurrence verified: T(${diskCount}) = 2^{${diskCount}} - 1 = ${optimalMoves}.`,
-          'strategic_subgoal'
+          `Transferred ${diskCount} disks in ${nextMoves} moves (Optimal minimum: ${optimalMoves}).`,
+          `By solving the recurrence T(n) = 2T(n-1) + 1 with base case T(1) = 1, we get T(n) = 2^n - 1. For n=${diskCount}, T(${diskCount}) = 2^${diskCount} - 1 = ${optimalMoves} moves.`,
+          'strategic_subgoal',
+          'Rosen 8th Ed. Section 8.1 Example 1 & Theorem 1'
         );
-
-        if (currentStage === 'INDEPENDENT_APPLICATION') {
-          if (nextMoves <= optimalMoves + 3) {
-            markConceptMastered('recurrence-relations');
-          }
-        }
       }
     }
   };
 
-  const diskColors = [
-    'from-rose-500 to-pink-600',
-    'from-amber-400 to-orange-500',
-    'from-emerald-400 to-teal-500',
-    'from-indigo-500 to-blue-600',
-    'from-purple-500 to-violet-600'
+  const pegLabels = ['Peg A (Source)', 'Peg B (Auxiliary)', 'Peg C (Destination)'];
+  const diskGradients = [
+    'from-cyan-400 via-sky-300 to-blue-500',
+    'from-emerald-400 via-teal-300 to-green-600',
+    'from-amber-400 via-yellow-200 to-orange-500',
+    'from-fuchsia-400 via-pink-300 to-purple-600',
+    'from-rose-400 via-red-300 to-rose-700'
   ];
 
-  const pegLabels = ['Peg A (Source)', 'Peg B (Auxiliary)', 'Peg C (Target)'];
+  // Rank calculator
+  const getRank = () => {
+    if (moveCount === 0) return null;
+    if (moveCount <= optimalMoves) return { label: 'S-RANK OPTIMAL', color: 'text-amber-300 border-amber-400/40 bg-amber-400/10' };
+    if (moveCount <= optimalMoves + 4) return { label: 'A-RANK GREAT', color: 'text-emerald-300 border-emerald-400/40 bg-emerald-400/10' };
+    return { label: 'B-RANK PASSING', color: 'text-blue-300 border-blue-400/40 bg-blue-400/10' };
+  };
+
+  const currentRank = getRank();
 
   return (
-    <div className="theme-panel rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+    <div className="theme-panel rounded-2xl p-5 flex flex-col gap-4 shadow-2xl relative overflow-hidden">
+      {/* Specular gloss top highlight */}
+      <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-white/10 to-transparent pointer-events-none rounded-t-2xl" />
+
       {/* Game Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-500/20 pb-3 relative z-10">
         <div>
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <span>Tower of Hanoi</span>
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-              {diskCount} Disks &bull; Glass Temple
+            <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold flex items-center gap-1">
+              <Zap className="w-3 h-3" />
+              <span>{diskCount} Disks &bull; Glass Temple</span>
             </span>
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-300">
             {currentStage === 'INDEPENDENT_APPLICATION' 
-              ? 'Independent Challenge: Solve in &le; 18 moves without hints' 
-              : 'Transfer the entire tower from Peg A to Peg C'}
+              ? `Mastery Challenge: Transfer all 4 disks to Peg C in optimal 15 moves` 
+              : 'Transfer the liquid crystal stack from Peg A to Peg C using recursive sub-goals'}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 font-mono text-xs bg-slate-950/80 px-3 py-1.5 rounded-xl border border-cyan-500/30">
+        <div className="flex items-center gap-2">
+          {currentRank && (
+            <div className={`hidden sm:flex items-center gap-1 font-mono text-[11px] px-2.5 py-1 rounded-xl border ${currentRank.color}`}>
+              <Award className="w-3.5 h-3.5" />
+              <span>{currentRank.label}</span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 font-mono text-xs bg-black/40 px-3 py-1.5 rounded-xl border border-cyan-500/30">
             <span className="text-slate-400">Moves:</span>
             <span className={`font-bold ${moveCount <= optimalMoves ? 'text-emerald-400' : 'text-amber-400'}`}>
               {moveCount}
             </span>
             <span className="text-slate-600">/</span>
-            <span className="text-slate-400">Optimal: {optimalMoves}</span>
+            <span className="text-cyan-300">Min: {optimalMoves}</span>
           </div>
 
           <button
+            onClick={undoMove}
+            disabled={history.length === 0 || isSolved}
+            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition border border-white/10 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+            title="Undo Last Move"
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+
+          <button
             onClick={resetGame}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-cyan-600/50 text-slate-300 hover:text-white transition border border-white/10"
+            className="p-2 rounded-xl bg-white/10 hover:bg-cyan-500/30 text-slate-300 hover:text-white transition border border-white/10 cursor-pointer"
             title="Reset Disks"
           >
             <RotateCcw className="w-4 h-4" />
@@ -183,37 +236,58 @@ export const HanoiGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Gameplay Arena */}
-      <div className="relative py-6 px-4 bg-slate-950/60 rounded-xl border border-cyan-500/20 flex items-end justify-around min-h-[260px]">
+      {/* Floating Selected Indicator */}
+      {selectedPeg !== null && (
+        <div className="py-1 px-3 rounded-lg bg-cyan-500/20 border border-cyan-400/40 text-cyan-200 text-xs font-mono flex items-center justify-between animate-pulse">
+          <span>HOLDING TOP DISK OF {pegLabels[selectedPeg].split(' ')[0]}</span>
+          <span className="text-cyan-400 font-bold">Select destination peg &rarr;</span>
+        </div>
+      )}
+
+      {/* Gameplay Arena — Frutiger Aero Translucent Glass Platform */}
+      <div className="relative py-6 px-4 bg-gradient-to-b from-cyan-950/40 via-sky-950/20 to-black/60 rounded-2xl border border-cyan-500/30 flex items-end justify-around min-h-[280px] shadow-inner">
         {pegs.map((peg, pIdx) => {
           const isSelected = selectedPeg === pIdx;
+          const isError = errorPeg === pIdx;
           return (
             <div
               key={pIdx}
               onClick={() => handlePegClick(pIdx)}
-              className={`flex-1 flex flex-col items-center cursor-pointer group transition-all py-2 rounded-xl ${
-                isSelected ? 'bg-cyan-950/40 ring-2 ring-cyan-400 shadow-lg shadow-cyan-500/20' : 'hover:bg-cyan-950/20'
+              className={`flex-1 flex flex-col items-center cursor-pointer group transition-all py-3 rounded-2xl relative ${
+                isSelected 
+                  ? 'bg-cyan-500/15 ring-2 ring-cyan-400 shadow-xl shadow-cyan-500/30 scale-[1.02]' 
+                  : isError
+                  ? 'bg-rose-500/20 ring-2 ring-rose-500 screen-shake'
+                  : 'hover:bg-cyan-500/10'
               }`}
             >
-              {/* Rod Pole */}
-              <div className="relative w-full flex justify-center items-end h-44">
-                {/* Vertical Wooden Peg */}
-                <div className={`absolute bottom-0 w-3.5 h-40 rounded-t-full transition-all aero-crystal-peg ${
-                  isSelected ? 'brightness-125' : ''
+              {/* Rod Pole with crystal gradient */}
+              <div className="relative w-full flex justify-center items-end h-48">
+                {/* Vertical crystal peg */}
+                <div className={`absolute bottom-0 w-3.5 h-44 rounded-t-full transition-all aero-crystal-peg ${
+                  isSelected ? 'brightness-125 shadow-lg shadow-cyan-400' : ''
                 }`} />
 
-                {/* Staked Disks */}
+                {/* Ambient light beam behind peg */}
+                <div className="absolute bottom-0 w-8 h-44 bg-cyan-400/10 blur-md pointer-events-none" />
+
+                {/* Stacked Disks */}
                 <div className="z-10 flex flex-col-reverse items-center w-full">
-                  {peg.map((diskSize) => {
-                    const widthPercent = 30 + (diskSize / diskCount) * 60;
-                    const colorClass = diskColors[(diskSize - 1) % diskColors.length];
+                  {peg.map((diskSize, dIdx) => {
+                    const widthPercent = 28 + (diskSize / diskCount) * 64;
+                    const gradient = diskGradients[(diskSize - 1) % diskGradients.length];
+                    const isTopDisk = dIdx === peg.length - 1;
+                    const isFloating = isSelected && isTopDisk;
+
                     return (
                       <div
                         key={diskSize}
                         style={{ width: `${widthPercent}%` }}
-                        className={`h-7 rounded-lg bg-gradient-to-r ${colorClass} aero-gloss-disk flex items-center justify-center font-mono font-bold text-xs text-white mb-1 transition-transform group-hover:scale-[1.02]`}
+                        className={`h-7 rounded-xl bg-gradient-to-r ${gradient} aero-gloss-disk flex items-center justify-center font-mono font-black text-xs text-slate-900 mb-1.5 transition-all select-none shadow-md ${
+                          isFloating ? '-translate-y-4 ring-2 ring-white scale-105 shadow-cyan-400/50' : ''
+                        }`}
                       >
-                        {diskSize}
+                        <span className="drop-shadow-sm font-extrabold">{diskSize}</span>
                       </div>
                     );
                   })}
@@ -221,8 +295,8 @@ export const HanoiGame: React.FC = () => {
               </div>
 
               {/* Peg Base Plate */}
-              <div className="w-4/5 h-3 rounded-full bg-cyan-950/80 mt-2 border border-cyan-500/40 shadow-sm shadow-cyan-500/20" />
-              <span className="text-xs font-mono font-medium text-cyan-300/80 mt-1">
+              <div className="w-5/6 h-3.5 rounded-full bg-cyan-900/60 mt-3 border border-cyan-400/50 shadow-md shadow-cyan-500/30" />
+              <span className="text-[11px] font-mono font-semibold text-cyan-200 mt-1.5">
                 {pegLabels[pIdx]}
               </span>
             </div>
@@ -232,15 +306,22 @@ export const HanoiGame: React.FC = () => {
 
       {/* Success Notification Bar */}
       {isSolved && (
-        <div className="p-4 rounded-xl bg-emerald-950/60 border border-emerald-500/50 flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in">
+        <div className="p-4 rounded-xl bg-emerald-950/80 border border-emerald-400/60 flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in shadow-2xl">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-400/40">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white">Puzzle Solved Successfully!</h4>
-              <p className="text-xs text-emerald-300">
-                You completed the challenge in {moveCount} moves (Minimum possible: {optimalMoves}).
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>Tower of Hanoi Solved!</span>
+                {moveCount <= optimalMoves && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 font-mono">
+                    OPTIMAL SOLUTION
+                  </span>
+                )}
+              </h4>
+              <p className="text-xs text-emerald-200">
+                You transferred all {diskCount} disks in {moveCount} moves (Optimal minimum: {optimalMoves}).
               </p>
             </div>
           </div>
@@ -248,16 +329,19 @@ export const HanoiGame: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={resetGame}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+              className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition cursor-pointer"
             >
               Replay
             </button>
             {currentStage !== 'INDEPENDENT_APPLICATION' && (
               <button
-                onClick={() => advanceStage()}
-                className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition"
+                onClick={() => {
+                  sound.playSuccess();
+                  advanceStage();
+                }}
+                className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/30 transition cursor-pointer"
               >
-                <span>Advance to Next Stage</span>
+                <span>Next Stage</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}
@@ -266,11 +350,10 @@ export const HanoiGame: React.FC = () => {
       )}
 
       {/* In-Game Interactive Hints / Contextual instructions */}
-      <div className="text-xs text-slate-400 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between">
-        <span>Click a peg to select the top disk, then click another peg to move it.</span>
-        <span className="text-indigo-400 font-mono text-[11px]">Recurrence: T(n) = 2T(n-1) + 1</span>
+      <div className="text-xs text-cyan-200/80 bg-black/40 p-3 rounded-xl border border-cyan-500/20 flex flex-wrap items-center justify-between gap-2">
+        <span>Click a peg to lift the top disk, then click a target peg to lower it.</span>
+        <span className="text-cyan-400 font-mono text-[11px] font-semibold">T(n) = 2T(n-1) + 1 &rArr; 2^n - 1</span>
       </div>
     </div>
   );
 };
-

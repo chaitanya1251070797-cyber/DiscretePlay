@@ -1,4 +1,4 @@
-import { KnowledgeNode, GameId } from '../types/learning';
+import { KnowledgeNode } from '../types/learning';
 
 export const KNOWLEDGE_GRAPH_NODES: KnowledgeNode[] = [
   // Recursion & Recurrences
@@ -96,6 +96,16 @@ export const KNOWLEDGE_GRAPH_NODES: KnowledgeNode[] = [
     description: 'Rigorous proof that BFS guarantees the minimum edge distance in unweighted graphs.',
     status: 'locked'
   },
+  {
+    id: 'hamiltonian-paths',
+    title: "Hamiltonian Paths & Warnsdorff's Heuristic",
+    category: 'Graph Theory',
+    gameId: 'knights-tour',
+    prerequisites: ['graph-traversal'],
+    rosenSection: 'Section 10.5',
+    description: "Constructing simple paths visiting every vertex exactly once, contrasting Euler circuits with NP-complete Hamiltonian tours.",
+    status: 'locked'
+  },
 
   // Number Theory & Cryptography
   {
@@ -170,4 +180,3 @@ export function getRecommendedNextNodes(masteredIds: string[]): KnowledgeNode[] 
     return prereqsMet;
   });
 }
-

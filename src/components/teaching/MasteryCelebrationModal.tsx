@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLearningEngine } from '../../engine/LearningEngineContext';
 import { KNOWLEDGE_GRAPH_NODES, getRecommendedNextNodes } from '../../engine/KnowledgeGraph';
-import { Trophy, Sparkles, CheckCircle2, ArrowRight, BookMarked, X } from 'lucide-react';
+import { Trophy, CheckCircle2, ArrowRight, BookMarked, X } from 'lucide-react';
+import { sound } from '../../utils/sound';
 import confetti from 'canvas-confetti';
 
 export const MasteryCelebrationModal: React.FC = () => {
@@ -13,6 +14,17 @@ export const MasteryCelebrationModal: React.FC = () => {
     currentGame,
     switchGame 
   } = useLearningEngine();
+
+  useEffect(() => {
+    if (isCelebrationOpen) {
+      sound.playSuccess();
+      confetti({
+        particleCount: 120,
+        spread: 90,
+        origin: { y: 0.5 }
+      });
+    }
+  }, [isCelebrationOpen]);
 
   if (!isCelebrationOpen) return null;
 
@@ -28,6 +40,7 @@ export const MasteryCelebrationModal: React.FC = () => {
   const nextRecommendations = getRecommendedNextNodes(allMasteredConcepts);
 
   const handleNextGame = () => {
+    sound.playClick(600);
     setCelebrationOpen(false);
     if (nextRecommendations.length > 0) {
       switchGame(nextRecommendations[0].gameId);
@@ -41,8 +54,11 @@ export const MasteryCelebrationModal: React.FC = () => {
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
 
         <button
-          onClick={() => setCelebrationOpen(false)}
-          className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition"
+          onClick={() => {
+            sound.playClick(400);
+            setCelebrationOpen(false);
+          }}
+          className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -86,15 +102,18 @@ export const MasteryCelebrationModal: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex items-center gap-3 w-full">
           <button
-            onClick={() => setCelebrationOpen(false)}
-            className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs transition"
+            onClick={() => {
+              sound.playClick(400);
+              setCelebrationOpen(false);
+            }}
+            className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs transition cursor-pointer"
           >
             Review Board
           </button>
           {nextRecommendations.length > 0 && (
             <button
               onClick={handleNextGame}
-              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition"
+              className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition cursor-pointer"
             >
               <span>Advance Curriculum</span>
               <ArrowRight className="w-4 h-4" />
@@ -105,4 +124,3 @@ export const MasteryCelebrationModal: React.FC = () => {
     </div>
   );
 };
-
