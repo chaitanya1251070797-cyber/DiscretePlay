@@ -134,7 +134,52 @@
 
 ---
 
-## 5. Implementation Roadmap for Execution
+## 5. Expanding the Curriculum: Next Games & Visual Themes to Add
+
+To expand DiscretePlay into a comprehensive Discrete Mathematics curriculum platform covering the full Kenneth H. Rosen syllabus, add the following games, each engineered with a dedicated visual aesthetic matching the reference styles:
+
+### Game 6: Knight's Tour & Hamiltonian Paths
+* **Discrete Math Concept:** Graph Theory, Euler Paths vs. Hamiltonian Cycles, Backtracking, and Warnsdorff's Heuristic (Rosen Chapter 10, Section 10.5).
+* **Target UI Theme:** **Glitchcore / Digital Noir — Corrupted Chess Matrix**
+  - High-contrast monochromatic chessboard with chromatic aberration glitch lines on visited squares.
+  - Knight piece visualized as a glowing cyan vector entity with red trail distortion.
+  - Real-time Degree Matrix visualizer displaying available unvisited knight moves per cell.
+* **Stage 5 Independent Challenge:** Complete a closed 5x5 or 6x6 Knight's Tour starting from a random corner square.
+
+### Game 7: Truth Table Logic Circuit Builder
+* **Discrete Math Concept:** Propositional Logic Gates (AND, OR, NOT, XOR, NAND), Karnaugh Maps, and Circuit Simplification (Rosen Chapter 12: Boolean Algebra).
+* **Target UI Theme:** **Japanese Cyberpunk — Neon PCB Breadboard**
+  - Pitch-black motherboard PCB background with glowing neon green copper conductive traces.
+  - Logic gate chips with glowing radioactive terminal pins and tactile toggle switches.
+  - Live truth table LED matrix that evaluates output propositions in real time.
+* **Stage 5 Independent Challenge:** Build an optimal 3-input minority/majority logic circuit using minimal NAND gates.
+
+### Game 8: Bridges of Königsberg (Eulerian Circuits)
+* **Discrete Math Concept:** Graph Degrees, Handshaking Lemma, and Eulerian Path/Circuit Theorem (Rosen Chapter 10, Section 10.5).
+* **Target UI Theme:** **Frutiger Aero — Floating River Archipelago**
+  - Glossy, aqua-blue translucent river with animated liquid currents and caustics.
+  - Land masses rendered as floating verdant glass islands connected by glowing crystal bridges.
+  - Bridge crossing counter with water-ripple splash animations upon transit.
+* **Stage 5 Independent Challenge:** Identify whether multi-bridge configurations admit an Eulerian trail by examining vertex degree parity before attempting traversal.
+
+### Game 9: RSA Key Exchange & Fermat's Little Theorem
+* **Discrete Math Concept:** Number Theory, Prime Factorization, Greatest Common Divisor (Euclidean Algorithm), and Public-Key Cryptography (Rosen Chapter 4, Sections 4.3 & 4.6).
+* **Target UI Theme:** **Y2K Chrome — Holographic Vault Terminal**
+  - Prismatic iridescent rainbow vault door with rotating metallic chrome tumblers.
+  - Interactive prime sieve matrix generating $p$, $q$, and calculating Euler's totient $\phi(n) = (p-1)(q-1)$.
+  - Real-time modular exponentiation calculator ($c = m^e \pmod n$).
+* **Stage 5 Independent Challenge:** Calculate the private decryption exponent $d \equiv e^{-1} \pmod{\phi(n)}$ using the Extended Euclidean Algorithm to unlock the mystery encrypted vault.
+
+### Game 10: Set Theory & Venn Diagram Venn-Wars
+* **Discrete Math Concept:** Set Operations (Union $\cup$, Intersection $\cap$, Complement $\overline{A}$, Cartesian Product $\times$), Principle of Inclusion-Exclusion (Rosen Chapter 2, Sections 2.1 & 2.2).
+* **Target UI Theme:** **Y2K Arcade — Holographic Overlap Battle**
+  - 3 overlapping holographic energy rings with glowing particle zones.
+  - Floating element orbs that must be sorted into symmetric difference regions under time pressure.
+* **Stage 5 Independent Challenge:** Solve a 3-set inclusion-exclusion cardinality puzzle without visual overlap aids.
+
+---
+
+## 6. Implementation Roadmap for Execution
 
 When `"make the changes in changes to be made.md"` is executed, proceed in this exact sequence:
 
@@ -157,8 +202,11 @@ When `"make the changes in changes to be made.md"` is executed, proceed in this 
 4. **`TeachingPanel.tsx` & Visualizers:**
    - Wrap the panel and all 5 visualizers in the matching physical material classes.
    - Ensure complete mathematical clarity and 100% preservation of all underlying game logic, telemetry, and Rosen textbook citations.
-5. **Compile & Test:**
+5. **Integrating New Games (Roadmap Expansion):**
+   - Register the 5 new games (Knight's Tour, Logic Circuit Builder, Bridges of Königsberg, RSA Cryptosystem, and Venn-Wars) into `src/games/registry.ts` and the Knowledge Graph prerequisite hierarchy.
+6. **Compile & Test:**
    - Run `npm run build` to ensure zero compilation or styling errors.
 
 ---
 *Authored as the complete UI design blueprint for DiscretePlay.*
+
