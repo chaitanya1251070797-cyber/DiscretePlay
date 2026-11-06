@@ -1,0 +1,381 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans antialiased overflow-x-hidden;
+  }
+  * {
+    box-sizing: border-box;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.8);
+}
+
+/* =========================================================================
+   KEYFRAME ANIMATIONS
+   ========================================================================= */
+@keyframes aero-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes aero-shimmer {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(200%) rotate(25deg); }
+}
+
+@keyframes cyber-scanline {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+@keyframes glitch-anim {
+  0% { transform: translate(0); text-shadow: -1.5px 0 #00ffff, 1.5px 0 #ff0055; }
+  25% { transform: translate(-1px, 1px); text-shadow: -2px 0 #00ffff, 2px 0 #ff0055; }
+  50% { transform: translate(1px, -1px); text-shadow: 2px 0 #00ffff, -2px 0 #ff0055; }
+  75% { transform: translate(-1px, -1px); text-shadow: -1px 0 #00ffff, 1px 0 #ff0055; }
+  100% { transform: translate(0); text-shadow: -1.5px 0 #00ffff, 1.5px 0 #ff0055; }
+}
+
+@keyframes holo-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes neon-pulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 102, 0.4), inset 0 0 15px rgba(0, 255, 102, 0.1); }
+  50% { box-shadow: 0 0 25px rgba(0, 255, 102, 0.7), inset 0 0 20px rgba(0, 255, 102, 0.25); }
+}
+
+@keyframes disk-land {
+  0% { transform: translateY(-8px) scale(1.05); }
+  60% { transform: translateY(2px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes zoom-in-95 {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-in { animation: fade-in 0.25s ease-out both; }
+.fade-in { animation: fade-in 0.25s ease-out both; }
+.zoom-in-95 { animation: zoom-in-95 0.2s ease-out both; }
+
+/* =========================================================================
+   THEME 1: FRUTIGER AERO — GLASS TEMPLE (Tower of Hanoi)
+   Aqua gloss, liquid light, translucent glass, soft cyan reflections
+   ========================================================================= */
+[data-game="tower-of-hanoi"] {
+  --theme-bg: radial-gradient(circle at 50% 10%, #032b43 0%, #06192e 45%, #020b14 100%);
+  --theme-accent: #00f0ff;
+  --theme-accent-secondary: #00ffa3;
+  --theme-panel-bg: rgba(6, 32, 58, 0.65);
+  --theme-panel-border: rgba(0, 240, 255, 0.35);
+  --theme-panel-glow: 0 12px 40px rgba(0, 162, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --theme-card-bg: rgba(9, 44, 78, 0.55);
+  --theme-btn-primary: linear-gradient(180deg, #00f0ff 0%, #0088ff 100%);
+  --theme-font-family: 'Inter', system-ui, sans-serif;
+}
+
+[data-game="tower-of-hanoi"] .theme-panel {
+  background: var(--theme-panel-bg) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid var(--theme-panel-border) !important;
+  box-shadow: var(--theme-panel-glow) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-game="tower-of-hanoi"] .theme-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+[data-game="tower-of-hanoi"] .aero-gloss-disk {
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 200, 255, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.8), inset 0 -2px 3px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  animation: disk-land 0.25s ease-out;
+}
+
+[data-game="tower-of-hanoi"] .aero-gloss-disk::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 10%;
+  right: 10%;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+[data-game="tower-of-hanoi"] .aero-crystal-peg {
+  background: linear-gradient(180deg, #e0f7ff 0%, #00c3ff 40%, #0066cc 100%);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* =========================================================================
+   THEME 2: JAPANESE CYBERPUNK — NEON INTELLIGENCE GRID (Minesweeper)
+   Black background, neon acid green, CRT scanlines, kanji markings, tech HUD
+   ========================================================================= */
+[data-game="minesweeper-logic"] {
+  --theme-bg: #040806;
+  --theme-accent: #00ff66;
+  --theme-accent-secondary: #05ffa1;
+  --theme-panel-bg: rgba(6, 15, 10, 0.92);
+  --theme-panel-border: rgba(0, 255, 102, 0.45);
+  --theme-panel-glow: 0 0 30px rgba(0, 255, 102, 0.15), inset 0 0 20px rgba(0, 255, 102, 0.05);
+  --theme-card-bg: rgba(0, 20, 10, 0.8);
+  --theme-btn-primary: linear-gradient(180deg, #00ff66 0%, #009933 100%);
+  --theme-font-family: 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+[data-game="minesweeper-logic"] {
+  background-image: 
+    linear-gradient(rgba(0, 255, 102, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 102, 0.04) 1px, transparent 1px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25) 2px, transparent 2px, transparent 4px);
+  background-size: 32px 32px, 32px 32px, 100% 4px;
+}
+
+[data-game="minesweeper-logic"] .theme-panel {
+  background: var(--theme-panel-bg) !important;
+  border: 1px solid var(--theme-panel-border) !important;
+  box-shadow: var(--theme-panel-glow) !important;
+  position: relative;
+}
+
+[data-game="minesweeper-logic"] .theme-panel::before {
+  content: 'LOGIC // 論理推論系統';
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  font-family: 'Fira Code', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: rgba(0, 255, 102, 0.4);
+  pointer-events: none;
+}
+
+[data-game="minesweeper-logic"] .cyber-cell {
+  background: #06110a;
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  box-shadow: inset 0 0 6px rgba(0, 255, 102, 0.1);
+  transition: all 0.15s ease;
+  font-family: 'Fira Code', monospace;
+}
+
+[data-game="minesweeper-logic"] .cyber-cell:hover:not(:disabled) {
+  border-color: #00ff66;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.6), inset 0 0 8px rgba(0, 255, 102, 0.3);
+  transform: scale(1.05);
+}
+
+[data-game="minesweeper-logic"] .cyber-cell-flagged {
+  background: rgba(255, 0, 85, 0.15);
+  border-color: #ff0055;
+  box-shadow: 0 0 14px rgba(255, 0, 85, 0.5);
+}
+
+/* =========================================================================
+   THEME 3: GLITCHCORE / DIGITAL NOIR — LOST DIGITAL NETWORK (Maze Graph)
+   Monochrome, chromatic aberration (cyan/magenta split), CRT noise, dark noir
+   ========================================================================= */
+[data-game="maze-graph"] {
+  --theme-bg: #050507;
+  --theme-accent: #00ffff;
+  --theme-accent-secondary: #ff0055;
+  --theme-panel-bg: rgba(10, 10, 14, 0.94);
+  --theme-panel-border: rgba(160, 160, 180, 0.25);
+  --theme-panel-glow: -2px 0 15px rgba(0, 255, 255, 0.15), 2px 0 15px rgba(255, 0, 85, 0.15);
+  --theme-card-bg: rgba(15, 15, 20, 0.85);
+  --theme-btn-primary: linear-gradient(90deg, #ff0055 0%, #7928ca 50%, #00ffff 100%);
+  --theme-font-family: 'Fira Code', 'Courier New', monospace;
+}
+
+[data-game="maze-graph"] {
+  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.6) 0px, rgba(0,0,0,0.6) 1px, transparent 1px, transparent 3px);
+  background-size: 100% 3px;
+}
+
+[data-game="maze-graph"] .theme-panel {
+  background: var(--theme-panel-bg) !important;
+  border-left: 2px solid #00ffff !important;
+  border-right: 2px solid #ff0055 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: var(--theme-panel-glow) !important;
+}
+
+[data-game="maze-graph"] .glitch-text-fx {
+  animation: glitch-anim 3s infinite alternate;
+}
+
+[data-game="maze-graph"] .noir-cell-wall {
+  background: #111116;
+  border: 1px solid #1f1f28;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+[data-game="maze-graph"] .noir-cell-player {
+  background: #00ffff;
+  box-shadow: -3px 0 #ff0055, 3px 0 #00ffff, 0 0 12px rgba(0, 255, 255, 0.8);
+  animation: glitch-anim 1.5s infinite;
+}
+
+[data-game="maze-graph"] .noir-cell-path {
+  background: #ffffff;
+  box-shadow: -2px 0 #ff0055, 2px 0 #00ffff, 0 0 15px rgba(255, 255, 255, 0.9);
+}
+
+/* =========================================================================
+   THEME 4: Y2K CHROME — HOLOGRAPHIC ENCRYPTION TERMINAL (Caesar Cipher)
+   Mirror metallic chrome typography, holographic rainbow gradients, iridescent
+   ========================================================================= */
+[data-game="caesar-cipher"] {
+  --theme-bg: radial-gradient(circle at 50% 20%, #200f3c 0%, #100620 50%, #06020c 100%);
+  --theme-accent: #e879f9;
+  --theme-accent-secondary: #38bdf8;
+  --theme-panel-bg: rgba(26, 12, 46, 0.75);
+  --theme-panel-border: rgba(232, 121, 249, 0.4);
+  --theme-panel-glow: 0 15px 40px rgba(168, 85, 247, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --theme-btn-primary: linear-gradient(135deg, #ff61d2 0%, #fe9090 20%, #ffe57f 40%, #84ffc9 60%, #70a6ff 80%, #e879f9 100%);
+}
+
+[data-game="caesar-cipher"] .theme-panel {
+  background: var(--theme-panel-bg) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  border: 1px solid transparent !important;
+  background-clip: padding-box !important;
+  position: relative;
+  box-shadow: 0 15px 45px rgba(147, 51, 234, 0.25) !important;
+}
+
+[data-game="caesar-cipher"] .theme-panel::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, #ff61d2, #fe9090, #ffe57f, #84ffc9, #70a6ff, #e879f9);
+  background-size: 300% 300%;
+  animation: holo-shift 6s ease infinite;
+  border-radius: inherit;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+[data-game="caesar-cipher"] .chrome-text {
+  background: linear-gradient(180deg, #ffffff 0%, #d8b4fe 40%, #6b21a8 70%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(168, 85, 247, 0.5));
+}
+
+[data-game="caesar-cipher"] .holo-badge {
+  background: linear-gradient(135deg, rgba(255, 97, 210, 0.2), rgba(112, 166, 255, 0.2));
+  border: 1px solid rgba(232, 121, 249, 0.5);
+  box-shadow: 0 0 12px rgba(232, 121, 249, 0.3);
+}
+
+/* =========================================================================
+   THEME 5: Y2K ARCADE — HOLOGRAPHIC BATTLE ARENA (Nim)
+   Dark space purple/indigo, wireframe perspective grid, neon arcade tokens
+   ========================================================================= */
+[data-game="nim-combinatorics"] {
+  --theme-bg: radial-gradient(circle at 50% 30%, #1e1145 0%, #0c0624 55%, #040112 100%);
+  --theme-accent: #a855f7;
+  --theme-accent-secondary: #06b6d4;
+  --theme-panel-bg: rgba(22, 14, 52, 0.85);
+  --theme-panel-border: rgba(168, 85, 247, 0.45);
+  --theme-panel-glow: 0 15px 40px rgba(124, 58, 237, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1);
+  --theme-btn-primary: linear-gradient(180deg, #c084fc 0%, #7e22ce 100%);
+}
+
+[data-game="nim-combinatorics"] {
+  background-image: 
+    linear-gradient(rgba(168, 85, 247, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+[data-game="nim-combinatorics"] .theme-panel {
+  background: var(--theme-panel-bg) !important;
+  border: 1px solid var(--theme-panel-border) !important;
+  box-shadow: var(--theme-panel-glow) !important;
+  position: relative;
+}
+
+[data-game="nim-combinatorics"] .arcade-stick {
+  background: linear-gradient(180deg, #ffedd5 0%, #f59e0b 35%, #d97706 70%, #78350f 100%);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(254, 240, 138, 0.6);
+  border-radius: 3px;
+  position: relative;
+}
+
+[data-game="nim-combinatorics"] .arcade-stick::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 35%;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 9999px;
+}
+
+/* =========================================================================
+   UNIVERSAL THEME-AWARE UTILITY CLASSES
+   ========================================================================= */
+.app-theme-wrapper {
+  background: var(--theme-bg, #020617);
+  color: #f8fafc;
+  min-height: 100vh;
+  transition: background 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.math-formula {
+  font-family: 'KaTeX_Main', 'Cambria Math', 'Times New Roman', serif;
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 1024px) {
+  .teaching-sticky {
+    position: static !important;
+    height: auto !important;
+  }
+}
