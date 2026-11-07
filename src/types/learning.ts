@@ -16,7 +16,8 @@ export type GameId =
   | 'minesweeper-logic'
   | 'maze-graph'
   | 'caesar-cipher'
-  | 'nim-combinatorics';
+  | 'nim-combinatorics'
+  | 'knights-tour';
 
 export interface MathematicalConcept {
   id: string;
@@ -131,4 +132,3 @@ export interface KnowledgeNode {
   description: string;
   status: 'locked' | 'available' | 'in_progress' | 'mastered';
 }
-

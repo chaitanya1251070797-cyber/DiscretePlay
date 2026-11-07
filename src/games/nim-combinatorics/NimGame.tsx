@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLearningEngine } from '../../engine/LearningEngineContext';
-import { Layers, RotateCcw, CheckCircle2, ShieldCheck, AlertCircle, Sparkles, Bot, User } from 'lucide-react';
+import { RotateCcw, CheckCircle2, Bot, User, Zap, Sparkles } from 'lucide-react';
+import { sound } from '../../utils/sound';
+import confetti from 'canvas-confetti';
 
 export const NimGame: React.FC = () => {
   const { 
@@ -10,7 +12,6 @@ export const NimGame: React.FC = () => {
     advanceStage, 
     markConceptMastered,
     updateSharedGameState,
-    setInteractionMode
   } = useLearningEngine();
 
   const isIndependent = currentStage === 'INDEPENDENT_APPLICATION';
@@ -25,6 +26,7 @@ export const NimGame: React.FC = () => {
   const [winner, setWinner] = useState<'player' | 'ai' | null>(null);
 
   const resetGame = useCallback(() => {
+    sound.playClick(400);
     setPiles(initialPiles);
     setSelectedPile(null);
     setSticksToRemove(1);
@@ -54,6 +56,7 @@ export const NimGame: React.FC = () => {
     const pileSize = piles[selectedPile];
     if (sticksToRemove < 1 || sticksToRemove > pileSize) return;
 
+    sound.playMove();
     const newPiles = [...piles];
     newPiles[selectedPile] -= sticksToRemove;
     setPiles(newPiles);
@@ -67,13 +70,13 @@ export const NimGame: React.FC = () => {
       recordAction(true);
       addExplanation(
         'Invincible P-Position Created! (Nim-Sum = 0)',
-        `You reduced Pile #${selectedPile + 1} and forced the Bitwise XOR Sum to 0!`,
+        `You reduced Heap #${selectedPile + 1} and balanced the Bitwise XOR Sum to 0!`,
         `By Bouton's Theorem, this is a P-position (Kernel). Every move your opponent makes will leave Nim-Sum > 0, granting you an unlosable countermove.`,
         'strategic_subgoal',
         'Rosen Section 4.2: Bit Operations and Bouton’s Theorem'
       );
     } else {
-      recordAction(false, 'unbalanced_nim_sum', `You left Nim-Sum = ${newNimSum} > 0. This is an N-position, giving the opponent a chance to balance it.`);
+      recordAction(false, 'unbalanced_nim_sum', `You left Nim-Sum = ${newNimSum} > 0. This gives the opponent an opportunity to balance it.`);
       addExplanation(
         'Vulnerable State Left (Nim-Sum > 0)',
         `Current Nim-Sum is ${newNimSum}.`,
@@ -85,9 +88,16 @@ export const NimGame: React.FC = () => {
     // Check if player took last stick (Win)
     if (newPiles.every(p => p === 0)) {
       setWinner('player');
+      sound.playSuccess();
+      confetti({
+        particleCount: 90,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+
       addExplanation(
         'Victory in Nim!',
-        'You took the final stick and won the match!',
+        'You took the final laser rod and won the match!',
         'Normal play convention: the player who makes the last legal move wins.',
         'strategic_subgoal'
       );
@@ -131,13 +141,14 @@ export const NimGame: React.FC = () => {
       const nextPiles = [...piles];
       nextPiles[movePile] = targetSize;
       setPiles(nextPiles);
+      sound.playPlace();
 
       const nextNimSum = nextPiles.reduce((acc, curr) => acc ^ curr, 0);
 
       if (nextNimSum === 0) {
         addExplanation(
           'AI Countermove Forced Nim-Sum = 0',
-          `AI removed ${removeCount} sticks from Pile #${movePile + 1}.`,
+          `AI removed ${removeCount} rods from Heap #${movePile + 1}.`,
           `AI balanced the XOR sum to 0 using n_i' = n_i XOR S.`,
           'invalid_move'
         );
@@ -146,54 +157,53 @@ export const NimGame: React.FC = () => {
       // Check if AI won
       if (nextPiles.every(p => p === 0)) {
         setWinner('ai');
+        sound.playError();
       } else {
         setCurrentTurn('player');
       }
-    }, 800);
+    }, 700);
 
     return () => clearTimeout(aiTimer);
   }, [currentTurn, piles, nimSum, winner, addExplanation]);
 
+  // AI expression state
+  const getAiMood = () => {
+    if (winner === 'player') return { text: 'DEFEATED...', color: 'text-rose-400', emoji: '💥' };
+    if (winner === 'ai') return { text: 'VICTORIOUS!', color: 'text-amber-400', emoji: '👑' };
+    if (nimSum === 0) return { text: 'NERVOUS (P-POSITION)', color: 'text-cyan-400', emoji: '😰' };
+    return { text: 'CONFIDENT (N-POSITION)', color: 'text-purple-300', emoji: '🤖' };
+  };
+
+  const aiMood = getAiMood();
+
   return (
-    <div className="theme-panel rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+    <div className="theme-panel rounded-2xl p-5 flex flex-col gap-4 shadow-2xl relative overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-500/20 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-500/30 pb-3">
         <div>
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <span>Nim & Combinatorial Game Theory</span>
-            <span className={`text-xs font-mono px-2 py-0.5 rounded border ${
-              nimSum === 0 
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
-                : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-            }`}>
-              Nim-Sum &oplus; = {nimSum} ({nimSum === 0 ? 'P-Kernel' : 'N-Kernel'}) &bull; Y2K Arcade
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-200 border border-purple-500/40">
+              Y2K ARCADE ARENA
             </span>
           </h2>
-          <p className="text-xs text-purple-200/70">
+          <p className="text-xs text-purple-200/80 font-mono mt-0.5">
             {isIndependent 
-              ? 'Independent Challenge: Compute the XOR sum of [3, 5, 7] and make the invincible countermove' 
-              : 'Remove any number of sticks from a single pile. Whoever takes the last stick wins!'}
+              ? 'Independent Challenge: Balance XOR sum for [3, 5, 7] to force unlosable P-position' 
+              : 'Take any number of laser rods from one heap. Maintain Nim-Sum = 0 to win!'}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-950/80 border border-purple-500/30 text-xs font-medium">
-            {currentTurn === 'player' ? (
-              <>
-                <User className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-purple-300 font-mono">Your Turn</span>
-              </>
-            ) : (
-              <>
-                <Bot className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-                <span className="text-amber-300 font-mono">AI Calculating...</span>
-              </>
-            )}
+        <div className="flex items-center gap-2 font-mono text-xs">
+          {/* AI Avatar Mood indicator */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/60 border border-purple-500/40 shadow-inner">
+            <span className="text-base">{aiMood.emoji}</span>
+            <span className={`font-bold text-[10px] ${aiMood.color}`}>{aiMood.text}</span>
           </div>
 
           <button
             onClick={resetGame}
-            className="p-2 rounded-xl bg-purple-950 border border-purple-500/30 hover:bg-purple-800 text-purple-300 hover:text-white transition"
+            className="p-2 rounded-xl bg-black/60 border border-purple-500/40 text-purple-300 hover:text-white transition cursor-pointer"
             title="Reset Piles"
           >
             <RotateCcw className="w-4 h-4" />
@@ -201,63 +211,87 @@ export const NimGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Matchstick Heaps Arena */}
-      <div className="p-6 bg-purple-950/30 rounded-xl border border-purple-500/20 flex justify-around items-end min-h-[220px]">
+      {/* Large Arcade 7-Segment / LED Matrix Display */}
+      <div className={`p-3 rounded-xl border font-mono text-center flex flex-col sm:flex-row items-center justify-between gap-2 shadow-inner ${
+        nimSum === 0
+          ? 'bg-emerald-950/70 border-emerald-400/60 text-emerald-300'
+          : 'bg-amber-950/70 border-amber-400/60 text-amber-300'
+      }`}>
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4" />
+          <span className="font-black tracking-wider text-xs sm:text-sm">
+            {nimSum === 0 
+              ? '[ P-POSITION: SAFE (S=0) — WINNING KERNEL ]' 
+              : `[ N-POSITION: VULNERABLE (S=${nimSum}) — UNBALANCED ]`}
+          </span>
+        </div>
+        <div className="text-[11px] font-bold px-2 py-0.5 rounded bg-black/40 border border-current">
+          XOR SUM: &oplus; = {nimSum} ({nimSum.toString(2).padStart(3, '0')}₂)
+        </div>
+      </div>
+
+      {/* Matchstick Heaps Arena — Perspective 3D Wireframe */}
+      <div className="relative p-6 bg-black/90 rounded-2xl border border-purple-500/40 flex justify-around items-end min-h-[240px] shadow-inner overflow-hidden">
         {piles.map((count, idx) => {
           const isSelected = selectedPile === idx;
           return (
             <div
               key={idx}
               onClick={() => {
-                if (count > 0 && currentTurn === 'player') {
+                if (count > 0 && currentTurn === 'player' && !winner) {
+                  sound.playClick(440);
                   setSelectedPile(idx);
                   setSticksToRemove(1);
                 }
               }}
               className={`flex flex-col items-center gap-2 p-3 rounded-2xl cursor-pointer transition-all ${
                 isSelected 
-                  ? 'bg-purple-900/60 ring-2 ring-purple-400 shadow-lg shadow-purple-500/30' 
+                  ? 'bg-purple-900/60 ring-2 ring-purple-400 shadow-xl shadow-purple-500/50 scale-105' 
                   : count > 0 
-                  ? 'hover:bg-purple-950/50' 
-                  : 'opacity-30 cursor-not-allowed'
+                  ? 'hover:bg-purple-950/50 hover:scale-[1.02]' 
+                  : 'opacity-25 cursor-not-allowed'
               }`}
             >
-              {/* Vertical sticks */}
-              <div className="flex flex-col-reverse gap-1.5 items-center min-h-[140px] justify-end">
+              {/* Vertical glowing laser rods */}
+              <div className="flex flex-col-reverse gap-2 items-center min-h-[140px] justify-end">
                 {Array.from({ length: count }, (_, sIdx) => (
                   <div
                     key={sIdx}
-                    className="w-4 h-5 arcade-stick shadow-md"
+                    className="w-5 h-5 arcade-stick shadow-lg shadow-amber-500/30 transition-transform hover:scale-110"
                   />
                 ))}
               </div>
 
-              <div className="text-center font-mono">
-                <span className="text-xs text-purple-300/70 block">Heap #{idx + 1}</span>
-                <span className="text-sm font-bold text-white">{count} sticks</span>
-                <span className="text-[10px] text-fuchsia-400 block font-mono">({count.toString(2).padStart(3, '0')}<sub>2</sub>)</span>
+              {/* Heap label and binary representation */}
+              <div className="text-center font-mono mt-1">
+                <span className="text-[11px] text-purple-300 font-bold block">Heap #{idx + 1}</span>
+                <span className="text-sm font-black text-white">{count} rods</span>
+                <span className="text-[10px] text-amber-300 block font-mono">({count.toString(2).padStart(3, '0')}₂)</span>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Player Action Controls */}
-      {selectedPile !== null && currentTurn === 'player' && (
-        <div className="p-4 bg-slate-950/80 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in">
+      {/* Player Action Controls with Chunky Arcade Buttons */}
+      {selectedPile !== null && currentTurn === 'player' && !winner && (
+        <div className="p-4 bg-black/80 rounded-2xl border border-purple-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in shadow-xl">
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-300 font-medium">
-              Remove sticks from Heap #{selectedPile + 1} (Max: {piles[selectedPile]}):
+            <span className="text-xs text-purple-200 font-bold">
+              Remove from Heap #{selectedPile + 1}:
             </span>
-            <div className="flex items-center gap-1 font-mono">
+            <div className="flex items-center gap-1.5 font-mono">
               {Array.from({ length: piles[selectedPile] }, (_, i) => i + 1).map(num => (
                 <button
                   key={num}
-                  onClick={() => setSticksToRemove(num)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                  onClick={() => {
+                    sound.playClick(500);
+                    setSticksToRemove(num);
+                  }}
+                  className={`w-8 h-8 rounded-xl text-xs font-black transition cursor-pointer shadow-md ${
                     sticksToRemove === num 
-                      ? 'bg-indigo-600 text-white' 
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                      ? 'bg-amber-400 text-slate-950 scale-110 ring-2 ring-white' 
+                      : 'bg-purple-950/90 text-purple-200 border border-purple-500/40 hover:bg-purple-800'
                   }`}
                 >
                   {num}
@@ -268,47 +302,69 @@ export const NimGame: React.FC = () => {
 
           <button
             onClick={handlePlayerMove}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-purple-500/40 transition active:scale-95 cursor-pointer"
           >
-            Confirm Move (Remove {sticksToRemove})
+            CONFIRM MOVE: TAKE {sticksToRemove} RODS
           </button>
+        </div>
+      )}
+
+      {/* Turn indicator banner if no selection */}
+      {selectedPile === null && !winner && (
+        <div className="py-2 px-4 rounded-xl bg-black/40 border border-purple-500/20 text-xs font-mono flex items-center justify-between">
+          <span className="text-purple-300">
+            {currentTurn === 'player' ? '👉 Click any Heap above to select how many laser rods to remove' : '🤖 AI calculating optimal countermove...'}
+          </span>
+          <span className="text-amber-300 font-bold">{currentTurn === 'player' ? 'YOUR MOVE' : 'AI TURN'}</span>
         </div>
       )}
 
       {/* Winner Banner */}
       {winner && (
-        <div className={`p-4 rounded-xl border flex items-center justify-between gap-3 animate-in fade-in ${
+        <div className={`p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-3 animate-in fade-in shadow-2xl ${
           winner === 'player' 
-            ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-200' 
-            : 'bg-rose-950/60 border-rose-500/50 text-rose-200'
+            ? 'bg-emerald-950/90 border-emerald-400 text-emerald-200' 
+            : 'bg-rose-950/90 border-rose-400 text-rose-200'
         }`}>
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5" />
+            <CheckCircle2 className="w-6 h-6 text-emerald-400" />
             <div>
-              <h4 className="text-sm font-bold">{winner === 'player' ? 'You Won!' : 'AI Won This Round!'}</h4>
+              <h4 className="text-sm font-black">{winner === 'player' ? 'Victory! You Won the Nim Match!' : 'AI Secured Victory'}</h4>
               <p className="text-xs opacity-90">
                 {winner === 'player' 
                   ? 'Your strategic maintenance of P-positions left the AI with zero counter-options.' 
-                  : 'The AI maintained Nim-Sum = 0 to secure the win.'}
+                  : 'The AI forced Nim-Sum = 0 to secure the win.'}
               </p>
             </div>
           </div>
 
-          <button
-            onClick={resetGame}
-            className="px-3 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-medium hover:bg-slate-700 transition"
-          >
-            Play Again
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={resetGame}
+              className="px-4 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition cursor-pointer"
+            >
+              Play Again
+            </button>
+            {winner === 'player' && currentStage !== 'INDEPENDENT_APPLICATION' && (
+              <button
+                onClick={() => {
+                  sound.playSuccess();
+                  advanceStage();
+                }}
+                className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition cursor-pointer"
+              >
+                Advance Stage
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {/* Footer */}
-      <div className="text-xs text-slate-400 bg-slate-950/40 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between">
-        <span>Bouton's Theorem: State is balanced & winning for previous player iff Nim-Sum = 0.</span>
-        <span className="text-emerald-400 font-mono text-[11px]">S = n_1 &oplus; n_2 &oplus; n_3</span>
+      <div className="text-xs text-purple-200/70 bg-black/40 p-3 rounded-xl border border-purple-500/20 flex flex-wrap items-center justify-between gap-2 font-mono">
+        <span>Bouton&apos;s Theorem: P-position (Kernel) &hArr; Nim-Sum &oplus; = 0.</span>
+        <span className="text-emerald-400 font-bold text-[11px]">S = n_1 &oplus; n_2 &oplus; n_3</span>
       </div>
     </div>
   );
 };
-

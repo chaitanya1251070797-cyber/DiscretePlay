@@ -70,6 +70,28 @@
   100% { transform: translateY(0) scale(1); }
 }
 
+@keyframes orb-glow {
+  0%, 100% { filter: drop-shadow(0 0 12px currentColor); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 22px currentColor); transform: scale(1.04); }
+}
+
+@keyframes pulse-pipeline {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 4px); }
+  40% { transform: translate(4px, -4px); }
+  60% { transform: translate(-3px, -2px); }
+  80% { transform: translate(3px, 2px); }
+}
+
+.screen-shake {
+  animation: screen-shake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+}
+
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
@@ -86,23 +108,68 @@
 
 /* =========================================================================
    THEME 1: FRUTIGER AERO — GLASS TEMPLE (Tower of Hanoi)
-   Aqua gloss, liquid light, translucent glass, soft cyan reflections
    ========================================================================= */
 [data-game="tower-of-hanoi"] {
-  --theme-bg: radial-gradient(circle at 50% 10%, #032b43 0%, #06192e 45%, #020b14 100%);
+  --theme-bg: radial-gradient(circle at 50% 12%, #083c5a 0%, #062035 45%, #020b14 100%);
   --theme-accent: #00f0ff;
   --theme-accent-secondary: #00ffa3;
-  --theme-panel-bg: rgba(6, 32, 58, 0.65);
-  --theme-panel-border: rgba(0, 240, 255, 0.35);
-  --theme-panel-glow: 0 12px 40px rgba(0, 162, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  --theme-card-bg: rgba(9, 44, 78, 0.55);
+  --theme-panel-bg: rgba(6, 32, 58, 0.72);
+  --theme-panel-border: rgba(0, 240, 255, 0.4);
+  --theme-panel-glow: 0 16px 48px rgba(0, 162, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --theme-card-bg: rgba(9, 44, 78, 0.6);
   --theme-btn-primary: linear-gradient(180deg, #00f0ff 0%, #0088ff 100%);
-  --theme-font-family: 'Inter', system-ui, sans-serif;
+}
+
+[data-game="tower-of-hanoi"] .nav-wrapper {
+  background: rgba(5, 25, 45, 0.85);
+  backdrop-filter: blur(24px) saturate(200%);
+  border-bottom: 1px solid rgba(0, 240, 255, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 140, 255, 0.2);
+}
+
+[data-game="tower-of-hanoi"] .nav-logo-orb {
+  background: radial-gradient(circle at 35% 30%, #a5f3fc 0%, #06b6d4 50%, #0284c7 100%);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+[data-game="tower-of-hanoi"] .nav-tabs-container {
+  background: rgba(3, 18, 33, 0.75);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+[data-game="tower-of-hanoi"] .nav-tab-active {
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.9) 0%, rgba(2, 132, 199, 0.9) 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+[data-game="tower-of-hanoi"] .nav-tab-inactive {
+  color: #7dd3fc;
+}
+[data-game="tower-of-hanoi"] .nav-tab-inactive:hover {
+  background: rgba(6, 182, 212, 0.18);
+  color: #ffffff;
+}
+
+[data-game="tower-of-hanoi"] .nav-btn-graph,
+[data-game="tower-of-hanoi"] .nav-btn-rosen,
+[data-game="tower-of-hanoi"] .nav-mastery-badge {
+  background: rgba(6, 32, 58, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  color: #e0f2fe;
+}
+
+[data-game="tower-of-hanoi"] .nav-glow-bar {
+  background: linear-gradient(90deg, transparent, #00f0ff, #38bdf8, transparent);
+  box-shadow: 0 0 12px #00f0ff;
 }
 
 [data-game="tower-of-hanoi"] .theme-panel {
   background: var(--theme-panel-bg) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
   border: 1px solid var(--theme-panel-border) !important;
   box-shadow: var(--theme-panel-glow) !important;
   position: relative;
@@ -115,17 +182,17 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 45%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 100%);
   pointer-events: none;
   border-radius: inherit;
 }
 
 [data-game="tower-of-hanoi"] .aero-gloss-disk {
   position: relative;
-  box-shadow: 0 8px 24px rgba(0, 200, 255, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.8), inset 0 -2px 3px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 28px rgba(0, 200, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.9), inset 0 -3px 4px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   animation: disk-land 0.25s ease-out;
 }
 
@@ -133,42 +200,83 @@
   content: '';
   position: absolute;
   top: 1px;
-  left: 10%;
-  right: 10%;
+  left: 12%;
+  right: 12%;
   height: 40%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.08) 100%);
   border-radius: 9999px;
   pointer-events: none;
 }
 
 [data-game="tower-of-hanoi"] .aero-crystal-peg {
-  background: linear-gradient(180deg, #e0f7ff 0%, #00c3ff 40%, #0066cc 100%);
-  box-shadow: 0 0 16px rgba(0, 229, 255, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: linear-gradient(180deg, #ffffff 0%, #38bdf8 40%, #0369a1 100%);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.7), inset 0 0 6px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.7);
 }
 
 /* =========================================================================
    THEME 2: JAPANESE CYBERPUNK — NEON INTELLIGENCE GRID (Minesweeper)
-   Black background, neon acid green, CRT scanlines, kanji markings, tech HUD
    ========================================================================= */
 [data-game="minesweeper-logic"] {
-  --theme-bg: #040806;
+  --theme-bg: #030604;
   --theme-accent: #00ff66;
   --theme-accent-secondary: #05ffa1;
-  --theme-panel-bg: rgba(6, 15, 10, 0.92);
-  --theme-panel-border: rgba(0, 255, 102, 0.45);
-  --theme-panel-glow: 0 0 30px rgba(0, 255, 102, 0.15), inset 0 0 20px rgba(0, 255, 102, 0.05);
-  --theme-card-bg: rgba(0, 20, 10, 0.8);
+  --theme-panel-bg: rgba(6, 18, 12, 0.95);
+  --theme-panel-border: rgba(0, 255, 102, 0.5);
+  --theme-panel-glow: 0 0 35px rgba(0, 255, 102, 0.2), inset 0 0 20px rgba(0, 255, 102, 0.06);
+  --theme-card-bg: rgba(0, 22, 12, 0.85);
   --theme-btn-primary: linear-gradient(180deg, #00ff66 0%, #009933 100%);
-  --theme-font-family: 'Fira Code', 'JetBrains Mono', monospace;
-}
-
-[data-game="minesweeper-logic"] {
   background-image: 
     linear-gradient(rgba(0, 255, 102, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 255, 102, 0.04) 1px, transparent 1px),
-    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25) 2px, transparent 2px, transparent 4px);
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3) 2px, transparent 2px, transparent 4px);
   background-size: 32px 32px, 32px 32px, 100% 4px;
+}
+
+[data-game="minesweeper-logic"] .nav-wrapper {
+  background: rgba(3, 10, 6, 0.94);
+  border-bottom: 1px solid rgba(0, 255, 102, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 255, 102, 0.15);
+}
+
+[data-game="minesweeper-logic"] .nav-logo-orb {
+  background: #000000;
+  border: 2px solid #00ff66;
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.7), inset 0 0 10px rgba(0, 255, 102, 0.4);
+  color: #00ff66;
+}
+
+[data-game="minesweeper-logic"] .nav-tabs-container {
+  background: #020804;
+  border: 1px solid rgba(0, 255, 102, 0.3);
+}
+
+[data-game="minesweeper-logic"] .nav-tab-active {
+  background: rgba(0, 255, 102, 0.2);
+  color: #00ff66;
+  border: 1px solid #00ff66;
+  box-shadow: 0 0 14px rgba(0, 255, 102, 0.5), inset 0 0 8px rgba(0, 255, 102, 0.3);
+}
+
+[data-game="minesweeper-logic"] .nav-tab-inactive {
+  color: #4ade80;
+}
+[data-game="minesweeper-logic"] .nav-tab-inactive:hover {
+  background: rgba(0, 255, 102, 0.1);
+  color: #86efac;
+}
+
+[data-game="minesweeper-logic"] .nav-btn-graph,
+[data-game="minesweeper-logic"] .nav-btn-rosen,
+[data-game="minesweeper-logic"] .nav-mastery-badge {
+  background: rgba(4, 20, 10, 0.9);
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  color: #86efac;
+}
+
+[data-game="minesweeper-logic"] .nav-glow-bar {
+  background: linear-gradient(90deg, transparent, #00ff66, #05ffa1, transparent);
+  box-shadow: 0 0 15px #00ff66;
 }
 
 [data-game="minesweeper-logic"] .theme-panel {
@@ -179,156 +287,211 @@
 }
 
 [data-game="minesweeper-logic"] .theme-panel::before {
-  content: 'LOGIC // 論理推論系統';
+  content: 'LOGIC SYSTEM // 論理推論系統 [01]';
   position: absolute;
-  top: 4px;
-  right: 12px;
-  font-family: 'Fira Code', monospace;
+  top: 5px;
+  right: 14px;
+  font-family: monospace;
   font-size: 9px;
-  letter-spacing: 0.15em;
-  color: rgba(0, 255, 102, 0.4);
+  letter-spacing: 0.18em;
+  color: rgba(0, 255, 102, 0.5);
   pointer-events: none;
 }
 
 [data-game="minesweeper-logic"] .cyber-cell {
-  background: #06110a;
-  border: 1px solid rgba(0, 255, 102, 0.3);
-  box-shadow: inset 0 0 6px rgba(0, 255, 102, 0.1);
+  background: #05140b;
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  box-shadow: inset 0 0 8px rgba(0, 255, 102, 0.12);
   transition: all 0.15s ease;
-  font-family: 'Fira Code', monospace;
+  font-family: monospace;
 }
 
 [data-game="minesweeper-logic"] .cyber-cell:hover:not(:disabled) {
   border-color: #00ff66;
-  box-shadow: 0 0 12px rgba(0, 255, 102, 0.6), inset 0 0 8px rgba(0, 255, 102, 0.3);
+  box-shadow: 0 0 14px rgba(0, 255, 102, 0.7), inset 0 0 10px rgba(0, 255, 102, 0.4);
   transform: scale(1.05);
 }
 
 [data-game="minesweeper-logic"] .cyber-cell-flagged {
-  background: rgba(255, 0, 85, 0.15);
+  background: rgba(255, 0, 85, 0.2);
   border-color: #ff0055;
-  box-shadow: 0 0 14px rgba(255, 0, 85, 0.5);
+  box-shadow: 0 0 16px rgba(255, 0, 85, 0.6), inset 0 0 8px rgba(255, 0, 85, 0.3);
 }
 
 /* =========================================================================
    THEME 3: GLITCHCORE / DIGITAL NOIR — LOST DIGITAL NETWORK (Maze Graph)
-   Monochrome, chromatic aberration (cyan/magenta split), CRT noise, dark noir
    ========================================================================= */
-[data-game="maze-graph"] {
-  --theme-bg: #050507;
+[data-game="maze-graph"],
+[data-game="knights-tour"] {
+  --theme-bg: #060608;
   --theme-accent: #00ffff;
   --theme-accent-secondary: #ff0055;
-  --theme-panel-bg: rgba(10, 10, 14, 0.94);
-  --theme-panel-border: rgba(160, 160, 180, 0.25);
-  --theme-panel-glow: -2px 0 15px rgba(0, 255, 255, 0.15), 2px 0 15px rgba(255, 0, 85, 0.15);
-  --theme-card-bg: rgba(15, 15, 20, 0.85);
+  --theme-panel-bg: rgba(10, 10, 14, 0.96);
+  --theme-panel-border: rgba(140, 140, 160, 0.3);
+  --theme-panel-glow: -3px 0 20px rgba(0, 255, 255, 0.2), 3px 0 20px rgba(255, 0, 85, 0.2);
+  --theme-card-bg: rgba(16, 16, 22, 0.88);
   --theme-btn-primary: linear-gradient(90deg, #ff0055 0%, #7928ca 50%, #00ffff 100%);
-  --theme-font-family: 'Fira Code', 'Courier New', monospace;
-}
-
-[data-game="maze-graph"] {
-  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.6) 0px, rgba(0,0,0,0.6) 1px, transparent 1px, transparent 3px);
+  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.65) 0px, rgba(0,0,0,0.65) 1px, transparent 1px, transparent 3px);
   background-size: 100% 3px;
 }
 
-[data-game="maze-graph"] .theme-panel {
+[data-game="maze-graph"] .nav-wrapper,
+[data-game="knights-tour"] .nav-wrapper {
+  background: rgba(8, 8, 12, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: -2px 4px 20px rgba(0, 255, 255, 0.12), 2px 4px 20px rgba(255, 0, 85, 0.12);
+}
+
+[data-game="maze-graph"] .nav-logo-orb,
+[data-game="knights-tour"] .nav-logo-orb {
+  background: #0d0d12;
+  border-left: 2px solid #00ffff;
+  border-right: 2px solid #ff0055;
+  box-shadow: -2px 0 10px #00ffff, 2px 0 10px #ff0055;
+}
+
+[data-game="maze-graph"] .nav-tabs-container,
+[data-game="knights-tour"] .nav-tabs-container {
+  background: #08080c;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+[data-game="maze-graph"] .nav-tab-active,
+[data-game="knights-tour"] .nav-tab-active {
+  background: linear-gradient(90deg, rgba(255, 0, 85, 0.3) 0%, rgba(0, 255, 255, 0.3) 100%);
+  color: #ffffff;
+  border: 1px solid rgba(0, 255, 255, 0.6);
+  box-shadow: -2px 0 10px rgba(255, 0, 85, 0.4), 2px 0 10px rgba(0, 255, 255, 0.4);
+}
+
+[data-game="maze-graph"] .nav-glow-bar,
+[data-game="knights-tour"] .nav-glow-bar {
+  background: linear-gradient(90deg, #ff0055, #a855f7, #00ffff);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
+}
+
+[data-game="maze-graph"] .theme-panel,
+[data-game="knights-tour"] .theme-panel {
   background: var(--theme-panel-bg) !important;
   border-left: 2px solid #00ffff !important;
   border-right: 2px solid #ff0055 !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow: var(--theme-panel-glow) !important;
-}
-
-[data-game="maze-graph"] .glitch-text-fx {
-  animation: glitch-anim 3s infinite alternate;
-}
-
-[data-game="maze-graph"] .noir-cell-wall {
-  background: #111116;
-  border: 1px solid #1f1f28;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
-}
-
-[data-game="maze-graph"] .noir-cell-player {
-  background: #00ffff;
-  box-shadow: -3px 0 #ff0055, 3px 0 #00ffff, 0 0 12px rgba(0, 255, 255, 0.8);
-  animation: glitch-anim 1.5s infinite;
-}
-
-[data-game="maze-graph"] .noir-cell-path {
-  background: #ffffff;
-  box-shadow: -2px 0 #ff0055, 2px 0 #00ffff, 0 0 15px rgba(255, 255, 255, 0.9);
 }
 
 /* =========================================================================
    THEME 4: Y2K CHROME — HOLOGRAPHIC ENCRYPTION TERMINAL (Caesar Cipher)
-   Mirror metallic chrome typography, holographic rainbow gradients, iridescent
    ========================================================================= */
 [data-game="caesar-cipher"] {
-  --theme-bg: radial-gradient(circle at 50% 20%, #200f3c 0%, #100620 50%, #06020c 100%);
+  --theme-bg: radial-gradient(circle at 50% 20%, #230f40 0%, #120626 50%, #06020e 100%);
   --theme-accent: #e879f9;
   --theme-accent-secondary: #38bdf8;
-  --theme-panel-bg: rgba(26, 12, 46, 0.75);
-  --theme-panel-border: rgba(232, 121, 249, 0.4);
-  --theme-panel-glow: 0 15px 40px rgba(168, 85, 247, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  --theme-panel-bg: rgba(28, 14, 50, 0.82);
+  --theme-panel-border: rgba(232, 121, 249, 0.45);
+  --theme-panel-glow: 0 18px 48px rgba(168, 85, 247, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   --theme-btn-primary: linear-gradient(135deg, #ff61d2 0%, #fe9090 20%, #ffe57f 40%, #84ffc9 60%, #70a6ff 80%, #e879f9 100%);
+}
+
+[data-game="caesar-cipher"] .nav-wrapper {
+  background: rgba(24, 10, 42, 0.88);
+  border-bottom: 1px solid rgba(232, 121, 249, 0.4);
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.25);
+}
+
+[data-game="caesar-cipher"] .nav-logo-orb {
+  background: linear-gradient(135deg, #ff61d2, #ffe57f, #84ffc9, #70a6ff);
+  background-size: 200% 200%;
+  animation: holo-shift 4s ease infinite;
+  box-shadow: 0 0 20px rgba(232, 121, 249, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+[data-game="caesar-cipher"] .nav-tabs-container {
+  background: rgba(16, 6, 30, 0.8);
+  border: 1px solid rgba(232, 121, 249, 0.3);
+}
+
+[data-game="caesar-cipher"] .nav-tab-active {
+  background: linear-gradient(135deg, #ff61d2, #70a6ff);
+  color: #ffffff;
+  box-shadow: 0 4px 18px rgba(232, 121, 249, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+[data-game="caesar-cipher"] .nav-tab-inactive {
+  color: #f0abfc;
+}
+[data-game="caesar-cipher"] .nav-tab-inactive:hover {
+  background: rgba(232, 121, 249, 0.16);
+  color: #ffffff;
+}
+
+[data-game="caesar-cipher"] .nav-glow-bar {
+  background: linear-gradient(90deg, #ff61d2, #fe9090, #ffe57f, #84ffc9, #70a6ff, #e879f9);
+  background-size: 200% 100%;
+  animation: pulse-pipeline 4s linear infinite;
+  box-shadow: 0 0 16px rgba(232, 121, 249, 0.7);
 }
 
 [data-game="caesar-cipher"] .theme-panel {
   background: var(--theme-panel-bg) !important;
-  backdrop-filter: blur(24px) saturate(200%) !important;
-  border: 1px solid transparent !important;
-  background-clip: padding-box !important;
-  position: relative;
-  box-shadow: 0 15px 45px rgba(147, 51, 234, 0.25) !important;
-}
-
-[data-game="caesar-cipher"] .theme-panel::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(135deg, #ff61d2, #fe9090, #ffe57f, #84ffc9, #70a6ff, #e879f9);
-  background-size: 300% 300%;
-  animation: holo-shift 6s ease infinite;
-  border-radius: inherit;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.7;
+  backdrop-filter: blur(26px) saturate(210%) !important;
+  border: 1px solid rgba(232, 121, 249, 0.4) !important;
+  box-shadow: var(--theme-panel-glow) !important;
 }
 
 [data-game="caesar-cipher"] .chrome-text {
-  background: linear-gradient(180deg, #ffffff 0%, #d8b4fe 40%, #6b21a8 70%, #ffffff 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #e0c3fc 35%, #8ec5fc 70%, #ffffff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(168, 85, 247, 0.5));
-}
-
-[data-game="caesar-cipher"] .holo-badge {
-  background: linear-gradient(135deg, rgba(255, 97, 210, 0.2), rgba(112, 166, 255, 0.2));
-  border: 1px solid rgba(232, 121, 249, 0.5);
-  box-shadow: 0 0 12px rgba(232, 121, 249, 0.3);
+  filter: drop-shadow(0 2px 6px rgba(168, 85, 247, 0.6));
 }
 
 /* =========================================================================
    THEME 5: Y2K ARCADE — HOLOGRAPHIC BATTLE ARENA (Nim)
-   Dark space purple/indigo, wireframe perspective grid, neon arcade tokens
    ========================================================================= */
 [data-game="nim-combinatorics"] {
-  --theme-bg: radial-gradient(circle at 50% 30%, #1e1145 0%, #0c0624 55%, #040112 100%);
+  --theme-bg: radial-gradient(circle at 50% 30%, #1e1145 0%, #0d0626 55%, #040112 100%);
   --theme-accent: #a855f7;
   --theme-accent-secondary: #06b6d4;
-  --theme-panel-bg: rgba(22, 14, 52, 0.85);
-  --theme-panel-border: rgba(168, 85, 247, 0.45);
-  --theme-panel-glow: 0 15px 40px rgba(124, 58, 237, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1);
+  --theme-panel-bg: rgba(24, 15, 56, 0.9);
+  --theme-panel-border: rgba(168, 85, 247, 0.5);
+  --theme-panel-glow: 0 18px 48px rgba(124, 58, 237, 0.35), inset 0 0 25px rgba(168, 85, 247, 0.12);
   --theme-btn-primary: linear-gradient(180deg, #c084fc 0%, #7e22ce 100%);
-}
-
-[data-game="nim-combinatorics"] {
   background-image: 
     linear-gradient(rgba(168, 85, 247, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(168, 85, 247, 0.08) 1px, transparent 1px);
   background-size: 40px 40px;
+}
+
+[data-game="nim-combinatorics"] .nav-wrapper {
+  background: rgba(16, 9, 38, 0.92);
+  border-bottom: 2px solid rgba(168, 85, 247, 0.5);
+  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.25);
+}
+
+[data-game="nim-combinatorics"] .nav-logo-orb {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+[data-game="nim-combinatorics"] .nav-tabs-container {
+  background: rgba(10, 5, 25, 0.85);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+[data-game="nim-combinatorics"] .nav-tab-active {
+  background: linear-gradient(180deg, #a855f7 0%, #6b21a8 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(216, 180, 254, 0.5);
+}
+
+[data-game="nim-combinatorics"] .nav-glow-bar {
+  background: linear-gradient(90deg, transparent, #a855f7, #ec4899, #06b6d4, transparent);
+  box-shadow: 0 0 16px #a855f7;
 }
 
 [data-game="nim-combinatorics"] .theme-panel {
@@ -336,25 +499,6 @@
   border: 1px solid var(--theme-panel-border) !important;
   box-shadow: var(--theme-panel-glow) !important;
   position: relative;
-}
-
-[data-game="nim-combinatorics"] .arcade-stick {
-  background: linear-gradient(180deg, #ffedd5 0%, #f59e0b 35%, #d97706 70%, #78350f 100%);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(254, 240, 138, 0.6);
-  border-radius: 3px;
-  position: relative;
-}
-
-[data-game="nim-combinatorics"] .arcade-stick::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20%;
-  right: 20%;
-  height: 35%;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 9999px;
 }
 
 /* =========================================================================
@@ -371,6 +515,13 @@
   font-family: 'KaTeX_Main', 'Cambria Math', 'Times New Roman', serif;
   font-style: italic;
   letter-spacing: 0.04em;
+}
+
+/* Pipeline connector animation */
+.pipeline-track {
+  background: linear-gradient(90deg, #3b82f6, #a855f7, #ec4899, #06b6d4, #10b981);
+  background-size: 200% 100%;
+  animation: pulse-pipeline 6s linear infinite;
 }
 
 @media (max-width: 1024px) {

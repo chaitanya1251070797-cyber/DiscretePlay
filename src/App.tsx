@@ -13,6 +13,7 @@ import { MinesweeperGame } from './games/minesweeper-logic/MinesweeperGame';
 import { MazeGraphGame } from './games/maze-graph/MazeGraphGame';
 import { CaesarGame } from './games/caesar-cipher/CaesarGame';
 import { NimGame } from './games/nim-combinatorics/NimGame';
+import { KnightsTourGame } from './games/knights-tour/KnightsTourGame';
 
 const GameViewport: React.FC = () => {
   const { currentGameId } = useLearningEngine();
@@ -24,6 +25,7 @@ const GameViewport: React.FC = () => {
       {currentGameId === 'maze-graph' && <MazeGraphGame />}
       {currentGameId === 'caesar-cipher' && <CaesarGame />}
       {currentGameId === 'nim-combinatorics' && <NimGame />}
+      {currentGameId === 'knights-tour' && <KnightsTourGame />}
     </div>
   );
 };
